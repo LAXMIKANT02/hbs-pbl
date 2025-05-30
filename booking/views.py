@@ -15,7 +15,8 @@ from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.core.mail import send_mail
 from django.conf import settings
-
+from django.shortcuts import render
+from django.http import JsonResponse
 
 def hotel_list(request):
     hotels = Hotel.objects.all()
@@ -129,27 +130,21 @@ def contact_us(request):
             return render(request, 'booking/contact_us.html', {'error': 'All fields are required.'})
     return render(request, 'booking/contact_us.html')
 
-@login_required
 def recommend_hotels(request):
-    last_activity = UserActivity.objects.filter(user=request.user).order_by('-timestamp').first()
-
-    hotels = Hotel.objects.all()
-    if last_activity:
-        if last_activity.location:
-            hotels = hotels.filter(location__icontains=last_activity.location)
-        if last_activity.min_rating:
-            hotels = hotels.filter(rating__gte=last_activity.min_rating)
-        if last_activity.max_price:
-            hotels = hotels.filter(rooms__price__lte=last_activity.max_price).distinct()
-
-    recommended = hotels.order_by('-rating')[:5]
-
-    data = [{
-        'name': hotel.name,
-        'location': hotel.location,
-        'price_range': f"{hotel.rooms.order_by('price').first().price} - {hotel.rooms.order_by('-price').first().price}",
-        'rating': float(hotel.rating),
-        'amenities': hotel.amenities,
-    } for hotel in recommended]
-
-    return JsonResponse({'recommendations': data})
+    recommendations = [
+        {
+            "name": "Grand Plaza",
+            "location": "New York",
+            "price_range": "$120 - $180",
+            "rating": 4.5,
+            "amenities": ["wifi", "pool", "gym"]
+        },
+        {
+            "name": "Sea View Resort",
+            "location": "Miami",
+            "price_range": "$200 - $250",
+            "rating": 4.0,
+            "amenities": ["wifi", "beach", "spa"]
+        }
+    ]
+    return JsonResponse({"recommendations": recommendations})

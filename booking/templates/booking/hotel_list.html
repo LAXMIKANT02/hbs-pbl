@@ -149,13 +149,24 @@
         <div class="collapse navbar-collapse">
             <ul class="navbar-nav ms-auto">
                 <li class="nav-item"><a href="{% url 'booking:hotel_list' %}" class="nav-link">Home</a></li>
+
+                <!-- 🔒 Show logout only if logged in -->
+                {% if user.is_authenticated %}
+                <li class="nav-item">
+                    <form method="POST" action="{% url 'logout' %}" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-outline-light btn-sm ms-3">Logout</button>
+                    </form>
+                </li>
+                {% endif %}
             </ul>
         </div>
     </div>
 </nav>
+
 <div class="container py-4">
     <h1 class="mb-4 text-center">Available Hotels</h1>
-    
+
     <div class="search-bar">
         <input type="text" id="searchInput" class="form-control" placeholder="Search hotels by name or location" aria-label="Search hotels" />
     </div>
@@ -167,6 +178,7 @@
         </a>
     </div>
     {% endif %}
+    
 
     <div class="hotel-container" id="hotelContainer" role="list">
         {% for hotel in hotels %}
@@ -193,9 +205,11 @@
         {% endfor %}
     </div>
 </div>
+
 <footer>
     &copy; {{ now.year }} Hotel Booking. All rights reserved.
 </footer>
+
 <script>
     document.getElementById('searchInput').addEventListener('input', function() {
         const filter = this.value.toLowerCase();
