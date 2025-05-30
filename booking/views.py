@@ -6,6 +6,16 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.db import transaction
 from django.http import HttpResponse
 from django.db.models import Q
+from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+from .models import UserActivity
+from django.views.decorators.http import require_POST
+from django.http import HttpResponseRedirect
+from django.urls import reverse
+from django.contrib.auth.decorators import login_required
+from django.core.mail import send_mail
+from django.conf import settings
+
 
 def hotel_list(request):
     hotels = Hotel.objects.all()
@@ -15,6 +25,14 @@ def hotel_list(request):
     min_rating = request.GET.get('min_rating')
     max_price = request.GET.get('max_price')
     amenities = request.GET.getlist('amenities')
+
+    if request.user.is_authenticated and (location or min_rating or max_price):
+        UserActivity.objects.create(
+            user=request.user,
+            location=location or '',
+            min_rating=min_rating or 0,
+            max_price=max_price or 0
+        )
 
     if location:
         hotels = hotels.filter(location__icontains=location)
@@ -77,13 +95,6 @@ def management_view(request):
     bookings = Booking.objects.select_related('customer', 'room', 'room__hotel').all()
     return render(request, 'booking/management_view.html', {'bookings': bookings})
 
-from django.views.decorators.http import require_POST
-from django.http import HttpResponseRedirect
-from django.urls import reverse
-from django.contrib.auth.decorators import login_required
-from django.core.mail import send_mail
-from django.conf import settings
-
 @staff_member_required
 @require_POST
 def delete_booking(request, booking_id):
@@ -117,3 +128,28 @@ def contact_us(request):
         else:
             return render(request, 'booking/contact_us.html', {'error': 'All fields are required.'})
     return render(request, 'booking/contact_us.html')
+
+@login_required
+def recommend_hotels(request):
+    last_activity = UserActivity.objects.filter(user=request.user).order_by('-timestamp').first()
+
+    hotels = Hotel.objects.all()
+    if last_activity:
+        if last_activity.location:
+            hotels = hotels.filter(location__icontains=last_activity.location)
+        if last_activity.min_rating:
+            hotels = hotels.filter(rating__gte=last_activity.min_rating)
+        if last_activity.max_price:
+            hotels = hotels.filter(rooms__price__lte=last_activity.max_price).distinct()
+
+    recommended = hotels.order_by('-rating')[:5]
+
+    data = [{
+        'name': hotel.name,
+        'location': hotel.location,
+        'price_range': f"{hotel.rooms.order_by('price').first().price} - {hotel.rooms.order_by('-price').first().price}",
+        'rating': float(hotel.rating),
+        'amenities': hotel.amenities,
+    } for hotel in recommended]
+
+    return JsonResponse({'recommendations': data})
