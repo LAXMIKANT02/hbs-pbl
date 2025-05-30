@@ -142,7 +142,7 @@ def add_hotel(request):
         form = HotelForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect('hotel_list')
+            return redirect('booking:hotel_list')
     else:
         form = HotelForm()
     return render(request, 'booking/add_hotel.html', {'form': form})
@@ -197,3 +197,10 @@ def get_suggestions(request):
         'suggestions': suggestions,
         'query': query
     })
+
+from django.shortcuts import get_object_or_404
+
+def delete_hotel(request, hotel_id):
+    hotel = get_object_or_404(Hotel, id=hotel_id)
+    hotel.delete()
+    return redirect('booking:hotel_list')  # Use namespace if defined

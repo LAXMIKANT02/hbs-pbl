@@ -20,5 +20,6 @@ urlpatterns = [
     path('add-hotel/', views.add_hotel, name='add_hotel'),
     path('add-room/', views.add_room, name='add_room'),
     path('add-customer/', views.add_customer, name='add_customer'),
+    path('delete-hotel/<int:hotel_id>/', views.delete_hotel, name='delete_hotel'),
     path('suggestions/', views.get_suggestions, name='get_suggestions'),
 ]
