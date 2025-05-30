@@ -17,6 +17,7 @@ from django.core.mail import send_mail
 from django.conf import settings
 from django.shortcuts import render
 from django.http import JsonResponse
+from .forms import HotelForm, RoomForm, CustomerForm
 
 def hotel_list(request):
     hotels = Hotel.objects.all()
@@ -148,3 +149,36 @@ def recommend_hotels(request):
         }
     ]
     return JsonResponse({"recommendations": recommendations})
+
+@staff_member_required
+def add_hotel(request):
+    if request.method == "POST":
+        form = HotelForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('hotel_list')
+    else:
+        form = HotelForm()
+    return render(request, 'booking/add_hotel.html', {'form': form})
+
+@staff_member_required
+def add_room(request):
+    if request.method == "POST":
+        form = RoomForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('room_list')
+    else:
+        form = RoomForm()
+    return render(request, 'booking/add_room.html', {'form': form})
+
+@staff_member_required
+def add_customer(request):
+    if request.method == "POST":
+        form = CustomerForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('customer_list')
+    else:
+        form = CustomerForm()
+    return render(request, 'booking/add_customer.html', {'form': form})
