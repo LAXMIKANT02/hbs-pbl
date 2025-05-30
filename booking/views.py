@@ -1,3 +1,4 @@
+import spacy
 from django.shortcuts import render, get_object_or_404, redirect
 from .models import Hotel, Room, Customer, Booking
 from django.urls import reverse
@@ -19,45 +20,30 @@ from django.shortcuts import render
 from django.http import JsonResponse
 from .forms import HotelForm, RoomForm, CustomerForm
 
+# Load spaCy NLP model
+nlp = spacy.load("en_core_web_md")
+
 def hotel_list(request):
+    query = request.GET.get('query', '')
     hotels = Hotel.objects.all()
 
-    # Filtering parameters
-    location = request.GET.get('location')
-    min_rating = request.GET.get('min_rating')
-    max_price = request.GET.get('max_price')
-    amenities = request.GET.getlist('amenities')
+    if query:
+        query_doc = nlp(query.lower())
+        scored = []
 
-    if request.user.is_authenticated and (location or min_rating or max_price):
-        UserActivity.objects.create(
-            user=request.user,
-            location=location or '',
-            min_rating=min_rating or 0,
-            max_price=max_price or 0
-        )
+        for hotel in hotels:
+            text = f"{hotel.name} {hotel.description} {hotel.location}".lower()
+            sim = query_doc.similarity(nlp(text))
+            if sim > 0.6:
+                scored.append((sim, hotel))
 
-    if location:
-        hotels = hotels.filter(location__icontains=location)
-    if min_rating:
-        hotels = hotels.filter(rating__gte=min_rating)
-    if amenities:
-        for amenity in amenities:
-            hotels = hotels.filter(amenities__contains=amenity)
+        scored.sort(reverse=True, key=lambda x: x[0])
+        hotels = [h[1] for h in scored]
 
-    if max_price:
-        hotels = hotels.filter(rooms__price__lte=max_price).distinct()
-
-    context = {
+    return render(request, 'booking/hotel_list.html', {
         'hotels': hotels,
-        'filters': {
-            'location': location or '',
-            'min_rating': min_rating or '',
-            'max_price': max_price or '',
-            'amenities': amenities or [],
-        }
-    }
-    return render(request, 'booking/hotel_list.html', context)
-
+        'query': query
+    })
 def hotel_detail(request, hotel_id):
     hotel = get_object_or_404(Hotel, pk=hotel_id)
     rooms = hotel.rooms.filter(availability=True)
@@ -182,3 +168,32 @@ def add_customer(request):
     else:
         form = CustomerForm()
     return render(request, 'booking/add_customer.html', {'form': form})
+
+
+def get_suggestions(request):
+    query = request.GET.get('query', '')
+    results = []
+
+    if query:
+        query_doc = nlp(query)
+        all_hotels = Hotel.objects.all()
+
+        for hotel in all_hotels:
+            hotel_text = f"{hotel.name} {hotel.description} {hotel.location}"
+            hotel_doc = nlp(hotel_text)
+
+            similarity = query_doc.similarity(hotel_doc)
+            if similarity > 0.6:  # Threshold can be adjusted
+                results.append((similarity, hotel))
+
+        # Sort by similarity
+        results = sorted(results, key=lambda x: x[0], reverse=True)
+        suggestions = [hotel for _, hotel in results]
+
+    else:
+        suggestions = []
+
+    return render(request, 'booking/suggestions.html', {
+        'suggestions': suggestions,
+        'query': query
+    })

@@ -171,14 +171,16 @@
         <input type="text" id="searchInput" class="form-control" placeholder="Search hotels by name or location" aria-label="Search hotels" />
     </div>
 
-    {% if user.is_authenticated %}
-    <div class="text-center mb-4">
-        <a href="{% url 'booking:recommend_hotels' %}" class="btn btn-success btn-lg">
-            Get AI Hotel Recommendations
-        </a>
-    </div>
-    {% endif %}
-    
+   
+    <form method="get">
+    <input type="text" name="query" placeholder="Search hotels..." value="{{ query }}">
+    <button type="submit">Search</button>
+</form>
+
+{% if query %}
+    <h3>AI Suggestions for "{{ query }}":</h3>
+{% endif %}
+
 
     <div class="hotel-container" id="hotelContainer" role="list">
         {% for hotel in hotels %}
