@@ -42,7 +42,7 @@
         }
         .search-bar {
             max-width: 400px;
-            margin: 20px auto 40px auto;
+            margin: 20px auto 20px auto;
         }
         .hotel-container {
             display: flex;
@@ -149,16 +149,25 @@
         <div class="collapse navbar-collapse">
             <ul class="navbar-nav ms-auto">
                 <li class="nav-item"><a href="{% url 'booking:hotel_list' %}" class="nav-link">Home</a></li>
-                <!-- Removed My Bookings and Contact Us links as requested -->
             </ul>
         </div>
     </div>
 </nav>
 <div class="container py-4">
     <h1 class="mb-4 text-center">Available Hotels</h1>
+    
     <div class="search-bar">
         <input type="text" id="searchInput" class="form-control" placeholder="Search hotels by name or location" aria-label="Search hotels" />
     </div>
+
+    {% if user.is_authenticated %}
+    <div class="text-center mb-4">
+        <a href="{% url 'booking:recommend_hotels' %}" class="btn btn-success btn-lg">
+            Get AI Hotel Recommendations
+        </a>
+    </div>
+    {% endif %}
+
     <div class="hotel-container" id="hotelContainer" role="list">
         {% for hotel in hotels %}
         <div class="hotel-card" role="listitem" aria-label="{{ hotel.name }}">
