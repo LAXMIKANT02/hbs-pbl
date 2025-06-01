@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'booking',
+    'widget_tweaks',
 ]
 
 MIDDLEWARE = [
@@ -116,6 +117,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
+STATICFILES_DIRS = [
+    BASE_DIR / "booking" / "static"
+]
 
 # Media files (Uploaded images)
 MEDIA_URL = '/media/'
@@ -125,3 +129,9 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Login URL for @login_required decorator
+LOGIN_URL = '/login/'
+
+# Redirect URL after successful login
+LOGIN_REDIRECT_URL = '/'

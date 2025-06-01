@@ -20,18 +20,6 @@
     <form method="post" novalidate>
         {% csrf_token %}
         <div class="mb-3">
-            <label for="id_name" class="form-label">Name</label>
-            <input type="text" name="name" id="id_name" class="form-control" placeholder="Enter your full name" required>
-        </div>
-        <div class="mb-3">
-            <label for="id_email" class="form-label">Email</label>
-            <input type="email" name="email" id="id_email" class="form-control" placeholder="Enter your email address" required>
-        </div>
-        <div class="mb-3">
-            <label for="id_phone" class="form-label">Phone</label>
-            <input type="tel" name="phone" id="id_phone" class="form-control" placeholder="Enter your phone number" required>
-        </div>
-        <div class="mb-3">
             <label for="id_check_in" class="form-label">Check-in Date</label>
             <input type="date" name="check_in" id="id_check_in" class="form-control" required>
         </div>
