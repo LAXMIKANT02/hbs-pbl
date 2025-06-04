@@ -149,7 +149,12 @@
         <div class="collapse navbar-collapse">
             <ul class="navbar-nav ms-auto">
                 <li class="nav-item"><a href="{% url 'booking:hotel_list' %}" class="nav-link">Home</a></li>
-<<<<<<< HEAD
+
+                
+                {% if user.is_authenticated %}
+                <li class="nav-item"><a href="{% url 'booking:my_bookings' %}" class="nav-link">My Bookings</a></li>
+                {% endif %}
+                <li class="nav-item"><a href="{% url 'booking:contact_us' %}" class="nav-link">Contact Us</a></li>
 
                 <!-- 🔒 Show logout only if logged in -->
                 {% if user.is_authenticated %}
@@ -160,12 +165,6 @@
                     </form>
                 </li>
                 {% endif %}
-=======
-                {% if user.is_authenticated %}
-                <li class="nav-item"><a href="{% url 'booking:my_bookings' %}" class="nav-link">My Bookings</a></li>
-                {% endif %}
-                <li class="nav-item"><a href="{% url 'booking:contact_us' %}" class="nav-link">Contact Us</a></li>
->>>>>>> upstream
             </ul>
         </div>
     </div>
@@ -173,28 +172,9 @@
 
 <div class="container py-4">
     <h1 class="mb-4 text-center">Available Hotels</h1>
-<<<<<<< HEAD
-
-    <div class="search-bar">
-        <input type="text" id="searchInput" class="form-control" placeholder="Search hotels by name or location" aria-label="Search hotels" />
-    </div>
-
-   
-    <form method="get">
-    <input type="text" name="query" placeholder="Search hotels..." value="{{ query }}">
-    <button type="submit">Search</button>
-</form>
-
-{% if query %}
-    <h3>AI Suggestions for "{{ query }}":</h3>
-{% endif %}
-
-
-=======
     <form method="get" class="search-bar mb-4" role="search" aria-label="Hotel keyword search">
         <input type="text" name="keyword" class="form-control" placeholder="Search hotels by keyword" aria-label="Search hotels by keyword" value="{{ filters.keyword }}">
     </form>
->>>>>>> upstream
     <div class="hotel-container" id="hotelContainer" role="list">
         {% for hotel in hotels %}
         <div class="hotel-card" role="listitem" aria-label="{{ hotel.name }}">
@@ -219,8 +199,6 @@
     &copy; {{ now.year }} Hotel Booking. All rights reserved.
 </footer>
 
-<<<<<<< HEAD
-=======
 <!-- AI Chatbox UI -->
 <div id="aiChatbox" style="position: fixed; bottom: 20px; right: 20px; width: 300px; max-height: 400px; background: rgba(255,255,255,0.9); border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); display: flex; flex-direction: column; overflow: hidden; font-family: Arial, sans-serif; z-index: 1000;">
     <div id="aiChatHeader" style="background-color: #764ba2; color: white; padding: 10px; cursor: pointer; user-select: none;">
@@ -234,7 +212,6 @@
     </form>
 </div>
 
->>>>>>> upstream
 <script>
     const aiChatbox = document.getElementById('aiChatbox');
     const aiChatHeader = document.getElementById('aiChatHeader');

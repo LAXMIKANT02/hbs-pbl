@@ -350,7 +350,7 @@ def register(request):
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from django.conf import settings
-from google import genai
+import google.generativeai as genai
 import json
 from django.contrib.auth.decorators import login_required
 
@@ -398,3 +398,9 @@ def ai_chat(request):
             return JsonResponse({'error': str(e)}, status=500)
     else:
         return JsonResponse({'error': 'Invalid HTTP method'}, status=405)
+
+from django.shortcuts import render
+
+def add_hotel(request):
+    # You can modify this based on your form logic
+    return render(request, 'booking/add_hotel.html')
