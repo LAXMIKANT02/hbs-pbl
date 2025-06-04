@@ -52,6 +52,7 @@ hotel_booking_system/
 
 # Clone the repository
 git clone https://github.com/yourusername/hotel-booking-system.git
+
 cd hotel-booking-system
 
 # Create virtual environment
