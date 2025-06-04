@@ -1,10 +1,12 @@
+import csv
 from django.core.management.base import BaseCommand
 from booking.models import Hotel, Room, Customer, Booking
 from django.core.files import File
 import os
+from django.conf import settings
 
 class Command(BaseCommand):
-    help = 'Seed initial data for hotels, rooms, customers, and bookings'
+    help = 'Seed initial data for Indian hotels, rooms, customers, and bookings using CSV and local images'
 
     def handle(self, *args, **kwargs):
         # Clear existing data
@@ -13,59 +15,61 @@ class Command(BaseCommand):
         Room.objects.all().delete()
         Hotel.objects.all().delete()
 
-        media_path = os.path.join(os.getcwd(), 'media', 'hotel_images')
+        # Path to CSV file
+        csv_path = os.path.join(settings.BASE_DIR, 'hotels_india.csv')
+        # Local images directory path
+        images_dir = os.path.join(settings.BASE_DIR, 'media', 'hotel_images')
 
-        # Create hotels
-        hotel1 = Hotel(
-            name='Grand Plaza',
-            location='New York',
-            rating=4.5,
-            description='A luxurious hotel in the heart of New York.',
-            amenities=['wifi', 'pool', 'gym']
-        )
-        image_path1 = os.path.join(media_path, 'grand_plaza.jpg')
-        with open(image_path1, 'rb') as f:
-            hotel1.image.save('grand_plaza.jpg', File(f), save=False)
-        hotel1.save()
+        if not os.path.exists(csv_path):
+            self.stdout.write(self.style.ERROR(f'CSV file not found at {csv_path}'))
+            return
 
-        hotel2 = Hotel(
-            name='Sea View Resort',
-            location='Miami',
-            rating=4.0,
-            description='Enjoy the beautiful sea view and sandy beaches.',
-            amenities=['wifi', 'beach', 'spa']
-        )
-        image_path2 = os.path.join(media_path, 'sea_view_resort.jpg')
-        with open(image_path2, 'rb') as f:
-            hotel2.image.save('sea_view_resort.jpg', File(f), save=False)
-        hotel2.save()
+        if not os.path.exists(images_dir):
+            self.stdout.write(self.style.ERROR(f'Images directory not found at {images_dir}'))
+            return
 
-        # Create rooms for hotel1
-        Room.objects.create(
-            hotel=hotel1,
-            room_type='Single',
-            price=120.00,
-            availability=True
-        )
-        Room.objects.create(
-            hotel=hotel1,
-            room_type='Double',
-            price=180.00,
-            availability=True
-        )
+        with open(csv_path, newline='', encoding='utf-8') as csvfile:
+            reader = csv.DictReader(csvfile)
+            count = 0
+            for row in reader:
+                if count >= 60:
+                    break
+                name = row['name']
+                location = row['location']
+                description = row['description']
+                price_per_night = float(row['price_per_night']) if row['price_per_night'] else 100.0
+                image_filename = row['image']
 
-        # Create rooms for hotel2
-        Room.objects.create(
-            hotel=hotel2,
-            room_type='Suite',
-            price=250.00,
-            availability=True
-        )
-        Room.objects.create(
-            hotel=hotel2,
-            room_type='Double',
-            price=200.00,
-            availability=True
-        )
+                hotel = Hotel(
+                    name=name,
+                    location=location,
+                    description=description,
+                    rating=4.0,  # default rating
+                    amenities=[]  # empty amenities, can be updated later
+                )
 
-        self.stdout.write(self.style.SUCCESS('Successfully seeded hotel, room, customer, and booking data with local images.'))
+                image_path = os.path.join(images_dir, image_filename)
+                if os.path.exists(image_path):
+                    with open(image_path, 'rb') as img_file:
+                        hotel.image.save(image_filename, File(img_file), save=False)
+                else:
+                    self.stdout.write(self.style.WARNING(f'Image file {image_filename} not found for hotel {name}'))
+
+                hotel.save()
+
+                # Create 2 rooms per hotel with price from CSV for standard and deluxe
+                Room.objects.create(
+                    hotel=hotel,
+                    room_type='Standard',
+                    price=price_per_night,
+                    availability=True
+                )
+                Room.objects.create(
+                    hotel=hotel,
+                    room_type='Deluxe',
+                    price=price_per_night * 1.5,
+                    availability=True
+                )
+                count += 1
+
+        self.stdout.write(self.style.SUCCESS('Successfully seeded 60 Indian hotels with CSV data and local images.'))

@@ -26,7 +26,7 @@
         <p><strong>Room Type:</strong> {{ booking.room.room_type }}</p>
         <p><strong>Check-in:</strong> {{ booking.check_in }}</p>
         <p><strong>Check-out:</strong> {{ booking.check_out }}</p>
-        <p><strong>Status:</strong> {{ booking.status }}</p>
+        <p><strong>Status:</strong> <span style="color: green;">{{ booking.status|capfirst }}</span></p>
     </div>
     <a href="{% url 'booking:hotel_list' %}" class="btn btn-primary mt-3">Back to Hotels</a>
 </div>

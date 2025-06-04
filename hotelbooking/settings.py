@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -135,3 +136,9 @@ LOGIN_URL = '/login/'
 
 # Redirect URL after successful login
 LOGIN_REDIRECT_URL = '/'
+
+# Unsplash API Access Key
+UNSPLASH_ACCESS_KEY = '-VmBRGg0HxM2nfBV-EoZ5l-W_GDJo4fzc5GsC5yVw4I'
+
+# Gemini API Key for AI chatbox integration
+GEMINI_API_KEY = 'AIzaSyCV1e_NDIs81OnNXutFKw6R4VJxtRA9t4M'
