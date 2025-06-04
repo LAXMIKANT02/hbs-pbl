@@ -1,6 +1,7 @@
 from django.urls import path
 from django.shortcuts import render
 from . import views
+from django.contrib.auth import views as auth_views
 
 app_name = 'booking'
 
@@ -13,13 +14,15 @@ urlpatterns = [
     path('booking/confirmation/<int:booking_id>/', views.booking_confirmation, name='booking_confirmation'),
     path('management/', views.management_view, name='management_view'),
     path('management/delete/<int:booking_id>/', views.delete_booking, name='delete_booking'),
+    path('management/delete_hotel/<int:hotel_id>/', views.delete_hotel, name='delete_hotel'),
+    path('management/edit_hotel/<int:hotel_id>/', views.edit_hotel, name='edit_hotel'),
+    path('management/hotels/', views.hotel_management_view, name='hotel_management_view'),
     path('list_rooms/', views.list_rooms, name='list_rooms'),
     path('my_bookings/', views.my_bookings, name='my_bookings'),
     path('contact_us/', views.contact_us, name='contact_us'),
-    path('recommendations/', views.recommend_hotels, name='recommend_hotels'),
-    path('add-hotel/', views.add_hotel, name='add_hotel'),
-    path('add-room/', views.add_room, name='add_room'),
-    path('add-customer/', views.add_customer, name='add_customer'),
-    path('delete-hotel/<int:hotel_id>/', views.delete_hotel, name='delete_hotel'),
-    path('suggestions/', views.get_suggestions, name='get_suggestions'),
+    path('register/', views.register, name='register'),
+    path('login/', auth_views.LoginView.as_view(template_name='booking/login.html'), name='login'),
+    path('logout/', auth_views.LogoutView.as_view(next_page='booking:hotel_list'), name='logout'),
+    path('accounts/profile/', views.hotel_list, name='profile_redirect'),
+    path('api/ai_chat/', views.ai_chat, name='ai_chat'),
 ]

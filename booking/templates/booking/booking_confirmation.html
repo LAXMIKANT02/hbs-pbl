@@ -20,13 +20,13 @@
         <h4>Customer Details</h4>
         <p><strong>Name:</strong> {{ booking.customer.name }}</p>
         <p><strong>Email:</strong> {{ booking.customer.email }}</p>
-        <p><strong>Phone:</strong> {{ booking.customer.phone }}</p>
+        <!-- Phone number display removed as per user request -->
         <h4>Booking Details</h4>
         <p><strong>Hotel:</strong> {{ booking.room.hotel.name }}</p>
         <p><strong>Room Type:</strong> {{ booking.room.room_type }}</p>
         <p><strong>Check-in:</strong> {{ booking.check_in }}</p>
         <p><strong>Check-out:</strong> {{ booking.check_out }}</p>
-        <p><strong>Status:</strong> {{ booking.status }}</p>
+        <p><strong>Status:</strong> <span style="color: green;">{{ booking.status|capfirst }}</span></p>
     </div>
     <a href="{% url 'booking:hotel_list' %}" class="btn btn-primary mt-3">Back to Hotels</a>
 </div>

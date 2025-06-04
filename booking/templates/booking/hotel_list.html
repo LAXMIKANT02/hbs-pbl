@@ -149,6 +149,7 @@
         <div class="collapse navbar-collapse">
             <ul class="navbar-nav ms-auto">
                 <li class="nav-item"><a href="{% url 'booking:hotel_list' %}" class="nav-link">Home</a></li>
+<<<<<<< HEAD
 
                 <!-- 🔒 Show logout only if logged in -->
                 {% if user.is_authenticated %}
@@ -159,6 +160,12 @@
                     </form>
                 </li>
                 {% endif %}
+=======
+                {% if user.is_authenticated %}
+                <li class="nav-item"><a href="{% url 'booking:my_bookings' %}" class="nav-link">My Bookings</a></li>
+                {% endif %}
+                <li class="nav-item"><a href="{% url 'booking:contact_us' %}" class="nav-link">Contact Us</a></li>
+>>>>>>> upstream
             </ul>
         </div>
     </div>
@@ -166,6 +173,7 @@
 
 <div class="container py-4">
     <h1 class="mb-4 text-center">Available Hotels</h1>
+<<<<<<< HEAD
 
     <div class="search-bar">
         <input type="text" id="searchInput" class="form-control" placeholder="Search hotels by name or location" aria-label="Search hotels" />
@@ -182,6 +190,11 @@
 {% endif %}
 
 
+=======
+    <form method="get" class="search-bar mb-4" role="search" aria-label="Hotel keyword search">
+        <input type="text" name="keyword" class="form-control" placeholder="Search hotels by keyword" aria-label="Search hotels by keyword" value="{{ filters.keyword }}">
+    </form>
+>>>>>>> upstream
     <div class="hotel-container" id="hotelContainer" role="list">
         {% for hotel in hotels %}
         <div class="hotel-card" role="listitem" aria-label="{{ hotel.name }}">
@@ -189,14 +202,8 @@
             <img src="{{ hotel.image.url }}" alt="Image of {{ hotel.name }}" class="hotel-image" loading="lazy" />
             {% endif %}
             <a href="{% url 'booking:hotel_detail' hotel.id %}" class="hotel-link">{{ hotel.name }}</a>
-            <div class="star-rating" aria-label="Rating: {{ hotel.rating }} out of 5 stars">
-                {% for i in "12345" %}
-                    {% if hotel.rating|floatformat:1 >= i|add:"0" %}
-                        &#9733;
-                    {% else %}
-                        &#9734;
-                    {% endif %}
-                {% endfor %}
+            <div class="hotel-rating" style="font-size: 1.2rem; margin-bottom: 8px; color: #fff;">
+                Average Rating: {{ hotel.avg_rating|default:"No ratings yet" }}
             </div>
             <p class="hotel-location">{{ hotel.location }}</p>
             <p>{{ hotel.description|truncatewords:20 }}</p>
@@ -212,20 +219,122 @@
     &copy; {{ now.year }} Hotel Booking. All rights reserved.
 </footer>
 
+<<<<<<< HEAD
+=======
+<!-- AI Chatbox UI -->
+<div id="aiChatbox" style="position: fixed; bottom: 20px; right: 20px; width: 300px; max-height: 400px; background: rgba(255,255,255,0.9); border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); display: flex; flex-direction: column; overflow: hidden; font-family: Arial, sans-serif; z-index: 1000;">
+    <div id="aiChatHeader" style="background-color: #764ba2; color: white; padding: 10px; cursor: pointer; user-select: none;">
+        AI Chat
+        <span id="aiChatToggle" style="float: right; font-weight: bold;">−</span>
+    </div>
+    <div id="aiChatMessages" style="flex-grow: 1; padding: 10px; overflow-y: auto; font-size: 14px; color: #333; background: #f9f9f9;"></div>
+    <form id="aiChatForm" style="display: flex; border-top: 1px solid #ccc;">
+        <input type="text" id="aiChatInput" placeholder="Ask a question..." autocomplete="off" style="flex-grow: 1; border: none; padding: 10px; font-size: 14px;"/>
+        <button type="submit" style="background-color: #764ba2; color: white; border: none; padding: 10px 15px; cursor: pointer;">Send</button>
+    </form>
+</div>
+
+>>>>>>> upstream
 <script>
-    document.getElementById('searchInput').addEventListener('input', function() {
-        const filter = this.value.toLowerCase();
-        const hotelCards = document.querySelectorAll('#hotelContainer .hotel-card');
-        hotelCards.forEach(card => {
-            const name = card.querySelector('.hotel-link').textContent.toLowerCase();
-            const location = card.querySelector('.hotel-location').textContent.toLowerCase();
-            if (name.includes(filter) || location.includes(filter)) {
-                card.style.display = '';
-            } else {
-                card.style.display = 'none';
-            }
-        });
+    const aiChatbox = document.getElementById('aiChatbox');
+    const aiChatHeader = document.getElementById('aiChatHeader');
+    const aiChatToggle = document.getElementById('aiChatToggle');
+    const aiChatMessages = document.getElementById('aiChatMessages');
+    const aiChatForm = document.getElementById('aiChatForm');
+    const aiChatInput = document.getElementById('aiChatInput');
+
+    aiChatHeader.addEventListener('click', () => {
+        if (aiChatMessages.style.display === 'none') {
+            aiChatMessages.style.display = 'block';
+            aiChatForm.style.display = 'flex';
+            aiChatToggle.textContent = '−';
+        } else {
+            aiChatMessages.style.display = 'none';
+            aiChatForm.style.display = 'none';
+            aiChatToggle.textContent = '+';
+        }
     });
+
+    aiChatForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const userMessage = aiChatInput.value.trim();
+        if (!userMessage) return;
+
+        // Display user message
+        const userMsgDiv = document.createElement('div');
+        userMsgDiv.textContent = 'You: ' + userMessage;
+        userMsgDiv.style.marginBottom = '8px';
+        userMsgDiv.style.fontWeight = 'bold';
+        aiChatMessages.appendChild(userMsgDiv);
+
+        aiChatInput.value = '';
+        aiChatMessages.scrollTop = aiChatMessages.scrollHeight;
+
+        try {
+            const response = await fetch("{% url 'booking:ai_chat' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken'),
+                },
+                body: JSON.stringify({ message: userMessage }),
+            });
+
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+
+            const data = await response.json();
+            const aiResponseDiv = document.createElement('div');
+            aiResponseDiv.textContent = 'AI: ' + (data.answer || 'No response');
+            aiResponseDiv.style.marginBottom = '8px';
+            aiChatMessages.appendChild(aiResponseDiv);
+            aiChatMessages.scrollTop = aiChatMessages.scrollHeight;
+        } catch (error) {
+            const errorDiv = document.createElement('div');
+            errorDiv.textContent = 'AI: Error communicating with server.';
+            errorDiv.style.marginBottom = '8px';
+            aiChatMessages.appendChild(errorDiv);
+            aiChatMessages.scrollTop = aiChatMessages.scrollHeight;
+        }
+    });
+
+    // Helper function to get CSRF token from cookies
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+</script>
+
+<script>
+    // Fix for error: Cannot read properties of null (reading 'addEventListener')
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            const filter = this.value.toLowerCase();
+            const hotelCards = document.querySelectorAll('#hotelContainer .hotel-card');
+            hotelCards.forEach(card => {
+                const name = card.querySelector('.hotel-link').textContent.toLowerCase();
+                const location = card.querySelector('.hotel-location').textContent.toLowerCase();
+                if (name.includes(filter) || location.includes(filter)) {
+                    card.style.display = '';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
+    }
 </script>
 </body>
 </html>

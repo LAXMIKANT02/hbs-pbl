@@ -1,49 +1,89 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Management View - Bookings</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body>
-<div class="container mt-4">
-    <h1>Customer Bookings Management</h1>
-    <table class="table table-bordered">
-        <thead>
-            <tr>
-                <th>Booking ID</th>
-                <th>Customer</th>
-                <th>Room</th>
-                <th>Hotel</th>
-                <th>Check-in</th>
-                <th>Check-out</th>
-                <th>Status</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for booking in bookings %}
-            <tr>
-                <td>{{ booking.id }}</td>
-                <td>{{ booking.customer.name }}</td>
-                <td>{{ booking.room.room_type }}</td>
-                <td>{{ booking.room.hotel.name }}</td>
-                <td>{{ booking.check_in }}</td>
-                <td>{{ booking.check_out }}</td>
-                <td>{{ booking.status }}</td>
-                <td>
-                    <form method="post" action="{% url 'booking:delete_booking' booking.id %}" onsubmit="return confirm('Are you sure you want to delete this booking?');">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
-                    </form>
-                </td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="8">No bookings found.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+{% extends "booking/base.html" %}
+{% load static %}
+{% block content %}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+
+<style>
+    .card {
+        border-radius: 1rem;
+        animation: fadeIn 0.5s ease-in-out;
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .table-bordered th, .table-bordered td {
+        border: 1px solid #dee2e6 !important;
+    }
+    .table thead {
+        background-color: #f1f1f1;
+    }
+</style>
+
+<div class="container py-5">
+    <div class="card shadow border-0">
+        <div class="card-body p-5">
+            <h2 class="text-center text-primary mb-4">
+                <i class="bi bi-calendar-check-fill"></i> User Bookings
+            </h2>
+
+            {% if bookings %}
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover text-center align-middle">
+                    <thead>
+                        <tr>
+                            <th scope="col">Booking ID</th>
+                            <th scope="col">Customer</th>
+                            <th scope="col">Hotel</th>
+                            <th scope="col">Room</th>
+                            <th scope="col">Check-in</th>
+                            <th scope="col">Check-out</th>
+                            <th scope="col">Status</th>
+                            <th scope="col">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for booking in bookings %}
+                        <tr>
+                            <td>{{ booking.id }}</td>
+                            <td>{{ booking.customer.name }}</td>
+                            <td>{{ booking.room.hotel.name }}</td>
+                            <td>{{ booking.room.room_type }}</td>
+                            <td>{{ booking.check_in }}</td>
+                            <td>{{ booking.check_out }}</td>
+                            <td>
+                                <span class="badge {% if booking.status == 'confirmed' %}bg-success
+                                                  {% elif booking.status == 'pending' %}bg-warning text-dark
+                                                  {% else %}bg-secondary{% endif %}">
+                                    {{ booking.status|capfirst }}
+                                </span>
+                            </td>
+                            <td>
+                                <form method="post" action="{% url 'booking:delete_booking' booking.id %}" style="display:inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-outline-danger btn-sm" onclick="return confirm('Are you sure?');">
+                                        <i class="bi bi-trash3-fill"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center text-muted mt-5">
+                <i class="bi bi-info-circle fs-1"></i>
+                <p class="fs-5 mt-3">No bookings found.</p>
+            </div>
+            {% endif %}
+
+            <div class="text-center mt-4">
+                <a href="{% url 'booking:hotel_management_view' %}" class="btn btn-primary btn-lg px-4 shadow">
+                    <i class="bi bi-arrow-left-circle"></i> Back to Hotel Management
+                </a>
+            </div>
+        </div>
+    </div>
 </div>
-</body>
-</html>
+{% endblock %}

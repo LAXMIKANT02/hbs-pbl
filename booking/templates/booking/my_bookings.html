@@ -5,11 +5,45 @@
     {% if bookings %}
     <div class="list-group">
         {% for booking in bookings %}
-        <div class="list-group-item mb-3 p-3" style="background: rgba(255, 255, 255, 0.15); border-radius: 10px; color: #fff;">
+        <div class="list-group-item mb-3 p-3" style="background: rgba(255, 255, 255, 0.15); border-radius: 10px; color: #000;">
             <h5>{{ booking.room.hotel.name }} - {{ booking.room.room_type }}</h5>
             <p>Check-in: {{ booking.check_in }}</p>
             <p>Check-out: {{ booking.check_out }}</p>
-            <p>Status: {{ booking.status|capfirst }}</p>
+            <p>Status: <span style="color: green;">{{ booking.status|capfirst }}</span></p>
+            <p>Current Rating: 
+                {% with None as rating_value %}
+                {% for ur in user_ratings %}
+                    {% if ur.hotel_id == booking.room.hotel.id %}
+                        {% with ur.rating as rating_value %}
+                        {% endwith %}
+                        {% comment %} Django template does not support break tag, so we remove it {% endcomment %}
+                    {% endif %}
+                {% endfor %}
+                {% if rating_value %}
+                    {% for i in "12345" %}
+                        {% if rating_value|default:0 >= i|add:"0" %}
+                            <span style="color: #ffc107;">&#9733;</span>
+                        {% else %}
+                            <span style="color: #e4e5e9;">&#9733;</span>
+                        {% endif %}
+                    {% endfor %}
+                {% else %}
+                    No rating yet
+                {% endif %}
+                {% endwith %}
+            </p>
+            <form method="post" action="">
+                {% csrf_token %}
+                <input type="hidden" name="hotel_id" value="{{ booking.room.hotel.id }}">
+                <label for="rating_{{ booking.room.hotel.id }}">Rate this hotel:</label>
+                <select name="rating" id="rating_{{ booking.room.hotel.id }}" required>
+                    <option value="">Select rating</option>
+                    {% for i in "12345" %}
+                    <option value="{{ i }}" {% if rating_value == i|add:"0" %}selected{% endif %}>{{ i }}</option>
+                    {% endfor %}
+                </select>
+                <button type="submit" class="btn btn-sm btn-primary mt-2">Submit Rating</button>
+            </form>
         </div>
         {% endfor %}
     </div>
